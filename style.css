@@ -1,0 +1,51 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+#board {
+    padding: 0;
+    margin: 0 0 0 0;
+    background-image: url("graphics/board-bg.png");
+    height: 100vh;
+    width: 100vw;
+    background-repeat: no-repeat;
+
+}
+#status-bar{
+    background-image: url("graphics/state-panel-bg.png");
+    width: 100vw;
+    height: 10vw;
+    background-size: 100%;
+}
+#map{
+    height: 60vh;
+    width: 60vh;
+    margin-top: 3vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+.cell{
+    border: 1px solid rgb(103, 101, 168);
+    background-color: rgb(103, 101, 168, 40%);
+}
+.cell:hover{
+    background-image: url("graphics/cell-hover-bg.png");
+    background-size: 100px;
+    cursor: crosshair;
+}
+.cell:active{
+    background-image: url("graphics/cell-selected-bg.png");
+    background-size: 100px;
+}
+.selected{
+    background-image: url("graphics/cell-selected-bg.png");
+    background-size: 100px;
+}
+.table_js_column{
+    background-color: deeppink;
+}
+td > img {
+    width: 100px;
+    height: 100px;
+}
