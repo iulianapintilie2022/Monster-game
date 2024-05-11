@@ -7,11 +7,11 @@ const trySwapCreatures = (sourceCoords, targetCoords) => {
     const isAdjacentHorizontal = offsetY === 0 && offsetX === -1 || offsetY === 0 && offsetX === 1;
     const isAdjacentVertical = offsetX === 0  && offsetY === -1 || offsetX === 0 && offsetY === 1;
     if(isAdjacentHorizontal || isAdjacentVertical) {
-        const checkMatch = tryMatch(targetCoords, sourceCoords);
-        if (checkMatch){
-            executeSwap(sourceCoords, targetCoords);
-            crushSequence();
-        }
+        const match = tryMatch(targetCoords, sourceCoords);
+            if(match){
+                executeSwap(sourceCoords, targetCoords);
+                crushSequence(match, targetCoords, sourceCoords);
+            }
     }
 };
 const tryMatch = (targetCoords, sourceCoords) => {
@@ -31,7 +31,7 @@ const tryMatch = (targetCoords, sourceCoords) => {
                 monsterCountVert++;
             } else if (monsterCountVert >= SEQUENCE_LENGTH) {
                 console.log("match vertical", monsterCountVert);
-                return true;
+                return verticalMonsters;
             } else if (verticalMonsters[i] !== sourceBeing) {
                 monsterCountVert = 0;
             }
@@ -43,7 +43,7 @@ const tryMatch = (targetCoords, sourceCoords) => {
                 monsterCountHor++;
             } else if (monsterCountHor >= SEQUENCE_LENGTH) {
                 console.log("match horizontal", monsterCountHor);
-                return true;
+                return horizontalMonsters;
             } else if (horizontalMonsters[i] !== sourceBeing) {
                 monsterCountHor = 0;
             }
@@ -103,14 +103,63 @@ const monsterOrderHorizontal = (coords, sourceCoords, rows) => {
     return checkMonsterOrder;
 }
 const executeSwap = (sourceCoords, targetCoords) => {
-    console.log("miaw");
-    // todo: literally animating and switching the content of the cells
+    const finalSource = {
+        x: null,
+        y: null,
+    };
+    const finalTarget = {
+        x: null,
+        y: null,
+    };
 
+    const source = document.querySelector(`[data-coords = "x${sourceCoords.x}_y${sourceCoords.y}"]`)
+    const target = document.querySelector(`[data-coords = "x${targetCoords.x}_y${targetCoords.y}"]`)
+
+    finalSource.x = target.getBoundingClientRect().left - source.getBoundingClientRect().left;
+    finalSource.y = target.getBoundingClientRect().top - source.getBoundingClientRect().top;
+
+    finalTarget.x = source.getBoundingClientRect().left - target.getBoundingClientRect().left;
+    finalTarget.y = source.getBoundingClientRect().top - target.getBoundingClientRect().top;
+
+    source.classList.toggle('swapped');
+    target.classList.toggle('swapped');
+    source.style.transform = `translate(${finalSource.x}px, ${finalSource.y}px)`;
+    target.style.transform = `translate(${finalTarget.x}px, ${finalTarget.y}px)`;
+
+    const sourceBeing =  source.parentNode.getAttribute(`data-being`);
+    const sourceImage = source.getAttribute(`src`);
+
+    setTimeout(() => {
+        source.setAttribute("src", target.getAttribute(`src`));
+        source.parentNode.setAttribute("data-being", target.parentNode.getAttribute(`data-being`));
+        target.setAttribute("src", sourceImage);
+        target.parentNode.setAttribute("data-being", sourceBeing);
+        source.classList.remove('swapped');
+        target.classList.remove('swapped');
+        source.removeAttribute('style');
+        target.removeAttribute('style');
+    }, 400);
 };
 
-const crushSequence = (coords) => {
+const crushSequence = (match, targetCoords, sourceCoords) => {
     // todo: get the coords from the first creature until last in the sequence
-    //  empty the cells, and generate new monsters
+    //  empty the cells, empty the target cell vertically and horizontally
+    // make sure only the neighbouring creatures in match are being cleared
+    const rows = document.getElementsByTagName('tr');
+    const targetRow = rows[targetCoords.y];
+    let matchCount = 0;
+    for (let i = 0; i < rows.length; i++){
+        const sourceMonsterCell = document
+            .querySelector(`[data-coords = "x${targetCoords.x}_y${i}"]`)
+            .parentNode;
+        if ((targetRow.cells[sourceCoords.x].getAttribute("data-being")) == (sourceMonsterCell.getAttribute("data-being"))) {
+            console.log("miaw");
+            matchCount++;
+            sourceMonsterCell.firstChild.setAttribute("src", "");
+            sourceMonsterCell.setAttribute("data-being", "");
+        }
+
+    }
 };
 
 const onCellClick = (event) => {
@@ -185,8 +234,8 @@ const drawMap = (rowsCount, colsCount) => {
     table.appendChild(tableBody);
     for(let i = 0; i < parseInt(rowsCount); i++) {
       let rowElement = table.insertRow(i);
-        for(var ii= 0; ii < parseInt(colsCount); ii++) {
-            var colElement=  rowElement.insertCell(ii);
+        for(let ii= 0; ii < parseInt(colsCount); ii++) {
+            let colElement=  rowElement.insertCell(ii);
             colElement.setAttribute('class', "cell");
         }
     }

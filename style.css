@@ -49,3 +49,6 @@ td > img {
     width: 100px;
     height: 100px;
 }
+.swapped {
+    transition: transform ease-in 0.4s;
+}
